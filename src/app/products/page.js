@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus, X, Search, Package, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Plus, X, Search, Package, Loader2, AlertCircle } from 'lucide-react';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -13,22 +13,32 @@ export default function ProductManagement() {
   const [currentId, setCurrentId] = useState(null);
   const [formData, setFormData] = useState({ name: "", price: "", category: "Makanan", image: "📦" });
 
-  // Fetch Data
+  // Fetch Data (DIPERBAIKI)
   async function fetchProducts() {
     setIsLoading(true);
     try {
       const res = await fetch('/api/products');
       const data = await res.json();
-      setProducts(data);
+      
+      // --- PENGAMAN UTAMA ---
+      // Cek apakah data benar-benar Array?
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        console.error("Data error:", data);
+        setProducts([]); // Kalau bukan array, paksa kosong biar gak crash
+      }
     } catch (error) {
       console.error("Gagal memuat data");
+      setProducts([]); 
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   useEffect(() => { fetchProducts(); }, []);
 
-  // Handle Modal (Buka/Tutup & Reset Form)
+  // Handle Modal
   const openModal = (mode, product = null) => {
     setIsEditMode(mode === 'edit');
     if (mode === 'edit' && product) {
@@ -40,14 +50,10 @@ export default function ProductManagement() {
     setIsModalOpen(true);
   };
 
-  // Handle Submit (Simpan/Update)
+  // Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if(!formData.name || !formData.price) {
-        alert("Nama dan Harga wajib diisi"); 
-        return;
-    }
+    if(!formData.name || !formData.price) { alert("Nama dan Harga wajib diisi"); return; }
 
     const url = isEditMode ? `/api/products/${currentId}` : '/api/products';
     const method = isEditMode ? 'PUT' : 'POST';
@@ -58,7 +64,6 @@ export default function ProductManagement() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...formData, price: parseInt(formData.price) })
         });
-        
         setIsModalOpen(false);
         fetchProducts();
     } catch (error) {
@@ -73,17 +78,19 @@ export default function ProductManagement() {
     fetchProducts();
   };
 
-  // Filter Search
-  const filteredProducts = products.filter(p => 
+  // Filter Search (DIPERBAIKI)
+  // Kita pastikan dulu products adalah Array sebelum di-filter
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  const filteredProducts = safeProducts.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    // Gunakan bg-base-200 untuk latar belakang halaman yang sedikit abu-abu
     <div className="p-6 bg-base-200 min-h-screen text-neutral font-sans">
       
-      {/* HEADER SECTION */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Kelola Produk</h1>
@@ -91,7 +98,6 @@ export default function ProductManagement() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {/* Search Bar Modern */}
           <div className="relative flex-1 md:w-72">
             <Search className="absolute left-4 top-3.5 w-5 h-5 text-secondary/50" />
             <input 
@@ -102,8 +108,6 @@ export default function ProductManagement() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
-          {/* Tombol Tambah (Warna Primary) */}
           <button 
             onClick={() => openModal('add')} 
             className="btn btn-primary text-white shadow-md hover:shadow-lg transition-all rounded-xl px-6 gap-3"
@@ -114,12 +118,10 @@ export default function ProductManagement() {
         </div>
       </div>
 
-      {/* TABEL CARD CONTAINER */}
-      {/* Gunakan bg-base-100 untuk kartu putih bersih */}
+      {/* TABEL */}
       <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="table w-full">
-            {/* Header Tabel */}
             <thead className="bg-base-200/60 text-secondary text-sm uppercase font-semibold tracking-wider">
               <tr>
                 <th className="py-5 px-6 text-center w-24">Ikon</th>
@@ -129,11 +131,8 @@ export default function ProductManagement() {
                 <th className="py-5 px-6 text-center w-40">Aksi</th>
               </tr>
             </thead>
-            
-            {/* Body Tabel */}
             <tbody>
               {isLoading ? (
-                // Loading State
                 <tr>
                     <td colSpan="5" className="py-20 text-center text-secondary">
                         <div className="flex flex-col items-center gap-3">
@@ -143,7 +142,6 @@ export default function ProductManagement() {
                     </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
-                // Empty State
                 <tr>
                     <td colSpan="5" className="py-20 text-center text-secondary/70">
                         <div className="flex flex-col items-center gap-4">
@@ -152,13 +150,12 @@ export default function ProductManagement() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg">Tidak ada produk ditemukan</h3>
-                                <p className="text-sm">Coba kata kunci lain atau tambahkan produk baru.</p>
+                                <p className="text-sm">Silakan tambah menu baru.</p>
                             </div>
                         </div>
                     </td>
                 </tr>
               ) : (
-                // Data Rows
                 filteredProducts.map((p) => (
                 <tr key={p.id} className="border-b border-base-300/50 hover:bg-base-200/40 transition-colors">
                   <td className="py-4 px-6 text-center">
@@ -184,18 +181,10 @@ export default function ProductManagement() {
                   </td>
                   <td className="py-4 px-6 align-middle">
                     <div className="flex justify-center gap-3">
-                      <button 
-                        onClick={() => openModal('edit', p)} 
-                        className="btn btn-sm btn-square btn-ghost text-warning hover:bg-warning/10 tooltip" 
-                        data-tip="Edit"
-                      >
+                      <button onClick={() => openModal('edit', p)} className="btn btn-sm btn-square btn-ghost text-warning hover:bg-warning/10 tooltip" data-tip="Edit">
                         <Pencil className="w-5 h-5" />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(p.id)} 
-                        className="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10 tooltip" 
-                        data-tip="Hapus"
-                      >
+                      <button onClick={() => handleDelete(p.id)} className="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10 tooltip" data-tip="Hapus">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
@@ -206,7 +195,6 @@ export default function ProductManagement() {
           </table>
         </div>
         
-        {/* Footer Tabel */}
         {!isLoading && filteredProducts.length > 0 && (
             <div className="p-4 bg-base-200/30 border-t border-base-300/50 text-secondary text-sm text-right">
                 Menampilkan <strong>{filteredProducts.length}</strong> produk
@@ -214,12 +202,10 @@ export default function ProductManagement() {
         )}
       </div>
 
-      {/* --- MODERN MODAL FORM --- */}
+      {/* MODAL FORM */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-lg relative overflow-hidden flex flex-col max-h-[90vh] scale-100 animate-in zoom-in-95 duration-200">
-            
-            {/* Modal Header */}
             <div className="p-6 border-b border-base-300 flex justify-between items-center bg-base-100">
                 <div>
                     <h3 className="text-xl font-bold text-neutral">
@@ -232,10 +218,8 @@ export default function ProductManagement() {
                 </button>
             </div>
             
-            {/* Modal Body (Form) */}
             <div className="p-8 overflow-y-auto">
               <form id="productForm" onSubmit={handleSubmit} className="flex flex-col gap-6">
-                {/* Input Nama */}
                 <div className="form-control">
                   <label className="label-text font-bold text-neutral mb-2">Nama Produk <span className="text-error">*</span></label>
                   <input type="text" className="input input-bordered w-full focus:input-primary rounded-xl bg-base-200/50 focus:bg-base-100 transition-all py-3" required
@@ -243,7 +227,6 @@ export default function ProductManagement() {
                     value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
                 
-                {/* Input Harga & Kategori */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="form-control">
                     <label className="label-text font-bold text-neutral mb-2">Harga (Rp) <span className="text-error">*</span></label>
@@ -263,7 +246,6 @@ export default function ProductManagement() {
                   </div>
                 </div>
 
-                {/* Input Emoji */}
                 <div className="form-control">
                   <label className="label-text font-bold text-neutral mb-2">Ikon Emoji</label>
                   <div className="flex gap-4 items-center p-4 bg-base-200/50 rounded-xl border border-base-300">
@@ -280,11 +262,8 @@ export default function ProductManagement() {
               </form>
             </div>
             
-            {/* Modal Footer */}
             <div className="p-6 border-t border-base-300 bg-base-200/30 flex justify-end gap-3">
-                <button onClick={() => setIsModalOpen(false)} className="btn btn-ghost text-secondary hover:bg-base-300 rounded-xl px-6">
-                    Batal
-                </button>
+                <button onClick={() => setIsModalOpen(false)} className="btn btn-ghost text-secondary hover:bg-base-300 rounded-xl px-6">Batal</button>
                 <button type="submit" form="productForm" className="btn btn-primary text-white shadow-lg hover:shadow-primary/50 rounded-xl px-8 font-bold">
                     {isEditMode ? 'Simpan Perubahan' : 'Buat Produk'}
                 </button>

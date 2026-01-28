@@ -2,32 +2,46 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Receipt } from '@/components/Receipt';
-import { Printer, Calendar, Search, Loader2, History, FileSpreadsheet, CheckCircle } from 'lucide-react';
+import { Printer, Calendar, Search, Loader2, History, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx'; 
 
 export default function HistoryPage() {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState([]); // Default array kosong
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [toast, setToast] = useState(null); // State Toast
+  const [toast, setToast] = useState(null); 
   
   const [selectedTx, setSelectedTx] = useState(null); 
   const componentRef = useRef();
 
+  // --- 1. FETCH DATA (DIPERBAIKI) ---
   useEffect(() => {
     async function fetchHistory() {
       try {
         const res = await fetch('/api/history');
         const data = await res.json();
-        setTransactions(data);
+        
+        // PROTEKSI: Cek apakah data benar-benar Array?
+        if (Array.isArray(data)) {
+            setTransactions(data);
+        } else {
+            console.error("API Error:", data);
+            setTransactions([]); // Kalau error, paksa jadi array kosong biar gak crash
+            showToast("Gagal memuat data dari server", "error");
+        }
+      } catch (err) { 
+        console.error(err);
+        setTransactions([]); 
+        showToast("Terjadi kesalahan koneksi", "error");
+      } finally {
         setLoading(false);
-      } catch (err) { console.error(err); setLoading(false); }
+      }
     }
     fetchHistory();
   }, []);
 
-  const showToast = (message) => {
-    setToast(message);
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -67,13 +81,17 @@ export default function HistoryPage() {
         XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Penjualan");
         XLSX.writeFile(workbook, `Laporan_POS_${new Date().toISOString().split('T')[0]}.xlsx`);
         
-        showToast("Laporan berhasil didownload!"); // Notifikasi Sukses
+        showToast("Laporan berhasil didownload!", "success");
     } catch (e) {
-        alert("Gagal export excel");
+        showToast("Gagal export excel", "error");
     }
   };
 
-  const filteredTransactions = transactions.filter(tx => 
+  // --- FILTER AMAN ---
+  // Kita pastikan transactions adalah array sebelum di-filter
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
+  const filteredTransactions = safeTransactions.filter(tx => 
     tx.id.toString().includes(searchQuery) || 
     tx.items.some(item => item.product.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -84,9 +102,9 @@ export default function HistoryPage() {
       {/* Toast Notification */}
       {toast && (
         <div className="toast toast-top toast-end z-50">
-            <div className="alert alert-success shadow-lg text-white rounded-xl animate-bounce">
-                <CheckCircle className="w-5 h-5"/>
-                <span>{toast}</span>
+            <div className={`alert ${toast.type === 'success' ? 'alert-success' : 'alert-error'} shadow-lg text-white rounded-xl animate-bounce`}>
+                {toast.type === 'success' ? <CheckCircle className="w-5 h-5"/> : <AlertCircle className="w-5 h-5"/>}
+                <span>{toast.message}</span>
             </div>
         </div>
       )}
@@ -132,8 +150,12 @@ export default function HistoryPage() {
                 </tr>
             </thead>
             <tbody>
-                {loading ? <tr><td colSpan="6" className="text-center py-20"><Loader2 className="animate-spin mx-auto"/></td></tr> : 
-                filteredTransactions.map((tx) => (
+                {loading ? (
+                    <tr><td colSpan="6" className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary"/></td></tr>
+                ) : filteredTransactions.length === 0 ? (
+                    <tr><td colSpan="6" className="text-center py-20 text-gray-400">Data tidak ditemukan / Database Error.</td></tr>
+                ) : (
+                  filteredTransactions.map((tx) => (
                     <tr key={tx.id} className="border-b border-base-200/50 hover:bg-base-200/30">
                         <td className="py-4 px-6 font-mono font-bold text-primary">#{tx.id}</td>
                         <td className="py-4 px-6">
@@ -157,7 +179,7 @@ export default function HistoryPage() {
                             <button onClick={() => onPrintClick(tx)} className="btn btn-sm btn-ghost text-primary"><Printer className="w-5 h-5"/></button>
                         </td>
                     </tr>
-                ))}
+                )))}
             </tbody>
             </table>
         </div>
