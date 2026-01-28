@@ -4,7 +4,10 @@ import prisma from '@/lib/prisma';
 // AMBIL DATA (GET)
 export async function GET() {
   try {
-    const products = await prisma.product.findMany({ orderBy: { id: 'desc' } });
+    const products = await prisma.product.findMany({ 
+      where: { isDeleted: false }, // <--- Filter: Cuma ambil yang belum dihapus
+      orderBy: { id: 'desc' } 
+    });
     return NextResponse.json(products);
   } catch (error) {
     return NextResponse.json({ error: "Error" }, { status: 500 });

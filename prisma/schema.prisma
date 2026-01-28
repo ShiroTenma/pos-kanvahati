@@ -14,6 +14,7 @@ model Product {
   category  String
   image     String
   createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false) // <--- TAMBAHKAN INI
   items     TransactionItem[]
 }
 

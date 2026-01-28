@@ -28,15 +28,18 @@ export async function PUT(request, { params }) {
   }
 }
 
-// HAPUS DATA (DELETE)
+// HAPUS DATA (SOFT DELETE)
 export async function DELETE(request, { params }) {
   try {
-    // --- PERBAIKAN DI SINI JUGA ---
     const { id } = await params;
     const productId = parseInt(id);
-    // ------------------------------
 
-    await prisma.product.delete({ where: { id: productId } });
+    // Bukannya .delete, tapi kita .update
+    await prisma.product.update({
+      where: { id: productId },
+      data: { isDeleted: true } // <--- Tandai sebagai terhapus
+    });
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
