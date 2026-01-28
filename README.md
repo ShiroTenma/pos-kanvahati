@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏪 POS KANVAHATI
 
-## Getting Started
+**POS KANVAHATI** adalah sistem aplikasi kasir (Point of Sale) berbasis web modern yang dibangun menggunakan **Next.js**. Aplikasi ini dirancang untuk mempermudah operasional UMKM khususnya KANVAHATI dengan antarmuka yang bersih, cepat, dan fitur manajemen yang lengkap.
 
-First, run the development server:
+## ✨ Fitur Unggulan
+
+* **🛒 Kasir Pintar:**
+    * Pencarian menu instan (real-time search) dengan *fuzzy logic*.
+    * Filter kategori (Makanan, Minuman, Snack).
+    * Keranjang belanja dinamis dengan kalkulasi otomatis.
+* **💳 Sistem Pembayaran:**
+    * Mendukung opsi pembayaran **Tunai (Cash)** dan **QRIS**.
+    * Konfirmasi pembayaran dengan modal pop-up interaktif.
+* **📦 Manajemen Produk (CRUD):**
+    * Tambah, Edit, dan Hapus menu dengan mudah.
+    * Fitur **Soft Delete** (Menu yang dihapus tidak hilang dari riwayat transaksi).
+* **📊 Laporan & Riwayat:**
+    * Mencatat setiap transaksi secara detail (Waktu, Item, Total).
+    * **Export ke Excel (.xlsx)** untuk kemudahan rekapitulasi keuangan.
+    * Cetak ulang struk belanja kapan saja.
+* **🖨️ Cetak Struk:**
+    * Terintegrasi dengan printer thermal 58mm/80mm.
+* **🎨 UI/UX Modern:**
+    * Tema estetik *Pastel Blue & Cream*.
+    * Notifikasi interaktif (*Toast*) dan animasi halus.
+
+## 🛠️ Teknologi
+
+Project ini dibangun menggunakan stack teknologi modern:
+
+* **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+* **Language:** JavaScript (React)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [DaisyUI](https://daisyui.com/)
+* **Database:** [SQLite](https://www.sqlite.org/) (via Prisma ORM)
+* **State Management:** [Zustand](https://github.com/pmndrs/zustand)
+* **Tools:**
+    * `react-to-print` (Cetak Struk)
+    * `xlsx` (Export Excel)
+    * `fuse.js` (Pencarian Cepat)
+    * `lucide-react` (Ikon)
+
+## 🚀 Cara Instalasi (Localhost)
+
+Ikuti langkah ini untuk menjalankan aplikasi di komputer Anda.
+
+### 1. Persyaratan
+Pastikan komputer Anda sudah terinstall:
+* [Node.js](https://nodejs.org/) (Versi 18 atau terbaru)
+* [Git](https://git-scm.com/)
+
+### 2. Clone Repository
+Buka terminal dan jalankan perintah berikut:
+
+```bash
+git clone [https://github.com/username-anda/pos-kanvahati.git](https://github.com/username-anda/pos-kanvahati.git)
+cd pos-kanvahati
+
+```
+
+### 3. Install Dependencies
+
+Download semua library yang dibutuhkan:
+
+```bash
+npm install
+
+```
+
+### 4. Setup Database
+
+Buat file `.env` di folder root project (sejajar dengan `package.json`), lalu isi dengan:
+
+```env
+DATABASE_URL="file:./dev.db"
+
+```
+
+Kemudian, jalankan migrasi database untuk membuat tabel:
+
+```bash
+npx prisma migrate dev --name init
+
+```
+
+### 5. Jalankan Aplikasi
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka browser dan akses: **`http://localhost:3000`**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 📂 Struktur Folder
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── api/            # Backend API (Transaction, Products, History)
+│   ├── history/        # Halaman Riwayat Transaksi
+│   ├── products/       # Halaman Kelola Produk
+│   └── page.js         # Halaman Utama (Kasir)
+├── components/         # Komponen UI (Sidebar, Receipt, dll)
+├── lib/                # Konfigurasi Prisma Client
+└── store/              # State Management (Keranjang Belanja)
+prisma/
+├── schema.prisma       # Skema Database
+└── dev.db              # File Database SQLite
 
-## Learn More
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 📝 Catatan Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Aplikasi ini menggunakan **SQLite** yang merupakan database berbasis file lokal.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* Jika ingin men-deploy ke **Vercel** atau **Netlify**, Anda **HARUS** mengganti database ke **PostgreSQL** (misalnya menggunakan Supabase atau Neon Tech).
+* SQLite tidak akan menyimpan data secara permanen di lingkungan *serverless* seperti Vercel.
 
-## Deploy on Vercel
+## 🤝 Kontribusi
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Kontribusi sangat terbuka! Silakan *fork* repository ini dan buat *Pull Request* jika Anda ingin menambahkan fitur baru.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Dibuat dengan ❤️ oleh [**ShiroTenma** & **secretceremony**]
+
