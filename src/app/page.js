@@ -87,7 +87,7 @@ export default function POSPage() {
   // --- 4. LOGIC LAINNYA ---
   const fuse = useMemo(() => new Fuse(products, { keys: ['name', 'category'], threshold: 0.3 }), [products]);
   const filteredProducts = useMemo(() => {
-    let result = products;
+    let result = Array.isArray(products) ? products : [];
     if (query) result = fuse.search(query).map(res => res.item);
     if (activeCategory !== "All") result = result.filter(p => p.category === activeCategory);
     return result;
