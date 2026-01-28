@@ -1,29 +1,31 @@
+// src/app/api/transaction/route.js
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function POST(request) {
   try {
-    const body = await request.json(); // Terima data dari frontend
-    const { total, items } = body;
+    const body = await request.json();
+    const { total, items, paymentMethod } = body; // <--- Ambil paymentMethod
 
-    // Gunakan transaksi Database (Semua berhasil atau gagal semua)
+    // Gunakan transaksi Database (Atomicity)
     const result = await prisma.$transaction(async (tx) => {
       
-      // 1. Buat Catatan Transaksi Utama
+      // 1. Simpan Transaksi Utama
       const newTransaction = await tx.transaction.create({
         data: {
           total: total,
+          paymentMethod: paymentMethod || "CASH", // <--- Simpan ke DB
         }
       });
 
-      // 2. Masukkan Detail Barang yang Dibeli
+      // 2. Simpan Detail Barang
       for (const item of items) {
         await tx.transactionItem.create({
           data: {
             transactionId: newTransaction.id,
             productId: item.id,
             qty: item.qty,
-            price: item.price // Simpan harga saat beli (jaga2 kalau harga menu naik nanti)
+            price: item.price
           }
         });
       }

@@ -1,10 +1,12 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL") // <--- Bagian ini WAJIB ADA di versi 5
+  url      = env("DATABASE_URL")
 }
 
 model Product {
@@ -13,16 +15,18 @@ model Product {
   price     Int
   category  String
   image     String
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
-  isDeleted Boolean  @default(false) // <--- TAMBAHKAN INI
+  
   items     TransactionItem[]
 }
 
 model Transaction {
-  id        Int      @id @default(autoincrement())
-  total     Int
-  date      DateTime @default(now())
-  items     TransactionItem[]
+  id            Int      @id @default(autoincrement())
+  total         Int
+  paymentMethod String   @default("CASH") // <--- KOLOM BARU
+  date          DateTime @default(now())
+  items         TransactionItem[]
 }
 
 model TransactionItem {

@@ -9,13 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "daisyui": "^5.5.14",
+    "daisyui": "^4.12.10",
     "fuse.js": "^7.1.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-to-print": "^3.2.0",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
