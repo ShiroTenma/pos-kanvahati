@@ -40,7 +40,7 @@ export function ProductFormModal({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="form-control">
                 <label className="label-text font-bold text-neutral mb-2">Harga (Rp) <span className="text-error">*</span></label>
                 <div className="relative">
@@ -67,23 +67,35 @@ export function ProductFormModal({
                   <option>Snack</option>
                 </select>
               </div>
+              <div className="form-control">
+                <label className="label-text font-bold text-neutral mb-2">Jumlah Stok</label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full focus:input-primary rounded-xl bg-base-200/50 focus:bg-base-100 transition-all font-mono py-3"
+                  placeholder="0"
+                  value={formData.quantity}
+                  onChange={e => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                />
+              </div>
             </div>
 
             <div className="form-control">
-              <label className="label-text font-bold text-neutral mb-2">Ikon Emoji</label>
+              <label className="label-text font-bold text-neutral mb-2">URL Gambar Produk</label>
               <div className="flex gap-4 items-center p-4 bg-base-200/50 rounded-xl border border-base-300">
-                <div className="w-16 h-16 bg-base-100 rounded-2xl flex items-center justify-center text-4xl shadow-sm border border-base-300">
-                  {formData.image || "📦"}
+                <div className="w-24 h-24 bg-base-100 rounded-2xl flex items-center justify-center text-4xl shadow-sm border border-base-300 overflow-hidden">
+                  {formData.image ? (
+                    <img src={formData.image} alt={formData.name} className="w-full h-full object-cover" />
+                  ) : "📦"}
                 </div>
                 <div className="flex-1">
                   <input
                     type="text"
                     className="input input-bordered w-full focus:input-primary rounded-xl bg-base-100 transition-all"
-                    placeholder="Tempel emoji di sini (Win + .)"
+                    placeholder="https://example.com/image.png"
                     value={formData.image}
                     onChange={e => setFormData({ ...formData, image: e.target.value })}
                   />
-                  <p className="text-xs text-secondary mt-2">Tips: Gunakan tombol <kbd className="kbd kbd-sm">Win</kbd> + <kbd className="kbd kbd-sm">.</kbd> untuk membuka keyboard emoji.</p>
+                  <p className="text-xs text-secondary mt-2">Tips: Salin dan tempel URL gambar produk dari web.</p>
                 </div>
               </div>
             </div>

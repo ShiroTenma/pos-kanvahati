@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Menggunakan forwardRef agar bisa dibaca oleh react-to-print
-export const Receipt = React.forwardRef(({ cart, total, date }, ref) => {
+export const Receipt = React.forwardRef(({ cart, total, paidAmount, change, date, paymentMethod }, ref) => {
   return (
     <div ref={ref} className="p-4 bg-white text-black font-mono text-xs" style={{ width: '58mm', minHeight: '100mm' }}>
       
@@ -11,6 +11,7 @@ export const Receipt = React.forwardRef(({ cart, total, date }, ref) => {
         <p>Jl. Jend. Sudirman No. 1</p>
         <p>Balikpapan</p>
         <p className="mt-2 text-[10px]">{date}</p>
+        <p className="mt-1 text-[10px]">Metode: {paymentMethod}</p>
       </div>
 
       <div className="border-b-2 border-dashed border-black mb-2"></div>
@@ -30,10 +31,24 @@ export const Receipt = React.forwardRef(({ cart, total, date }, ref) => {
 
       <div className="border-b-2 border-dashed border-black mb-2"></div>
 
-      {/* TOTAL */}
-      <div className="flex justify-between font-bold text-sm mb-4">
-        <span>TOTAL:</span>
-        <span>Rp {total.toLocaleString()}</span>
+      {/* TOTAL & PAYMENT */}
+      <div className="space-y-1">
+        <div className="flex justify-between font-bold">
+          <span>TOTAL:</span>
+          <span>Rp {total.toLocaleString()}</span>
+        </div>
+        {paymentMethod === 'CASH' && (
+          <>
+            <div className="flex justify-between">
+              <span>TUNAI:</span>
+              <span>Rp {paidAmount.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>KEMBALI:</span>
+              <span>Rp {change.toLocaleString()}</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* FOOTER */}

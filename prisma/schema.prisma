@@ -15,16 +15,19 @@ model Product {
   price     Int
   category  String
   image     String
+  quantity  Int      @default(0)
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
-  
   items     TransactionItem[]
 }
 
 model Transaction {
   id            Int      @id @default(autoincrement())
   total         Int
-  paymentMethod String   @default("CASH") // <--- KOLOM BARU
+  paymentMethod String   @default("CASH")
+  paidAmount    Int?
+  changeAmount  Int?
+  paymentProof  String?
   date          DateTime @default(now())
   items         TransactionItem[]
 }

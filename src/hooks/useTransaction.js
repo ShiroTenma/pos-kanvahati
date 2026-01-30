@@ -1,11 +1,16 @@
 "use client"
 import { useState } from 'react';
 
-export function useTransaction({ cart, clearCart, handlePrint, showToast, setIsCheckoutModalOpen, setTransactionDate }) {
+export function useTransaction({ cart, clearCart, handlePrint, showToast, setIsCheckoutModalOpen, setTransactionDate, setPaidAmount, setChange }) {
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
-  const processCheckout = async () => {
+  const processCheckout = async (data) => {
     const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const paidAmount = data?.cashReceived ? parseFloat(data.cashReceived) : total;
+    const change = data?.change ? parseFloat(data.change) : 0;
+
+    setPaidAmount(paidAmount);
+    setChange(change);
 
     try {
       const res = await fetch('/api/transaction', {
@@ -14,7 +19,9 @@ export function useTransaction({ cart, clearCart, handlePrint, showToast, setIsC
         body: JSON.stringify({
           total: total,
           items: cart,
-          paymentMethod: paymentMethod
+          paymentMethod: paymentMethod,
+          paidAmount: paidAmount,
+          change: change
         })
       });
 
